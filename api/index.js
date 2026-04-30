@@ -1,15 +1,19 @@
 export default async function handler(req, res) {
   try {
-    const url = req.query.url;
+    const target = "http://72.62.62.132:80"; // سرور خودت
 
-    if (!url) {
-      return res.status(400).json({ error: "missing url" });
-    }
+    const response = await fetch(target, {
+      method: req.method,
+      headers: req.headers,
+      body: req.method !== "GET" ? req.body : undefined
+    });
 
-    const response = await fetch(url);
-    const text = await response.text();
+    const data = await response.arrayBuffer();
 
-    res.status(200).send(text);
+    res.status(response.status);
+    response.headers.forEach((v, k) => res.setHeader(k, v));
+    res.send(Buffer.from(data));
+
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
